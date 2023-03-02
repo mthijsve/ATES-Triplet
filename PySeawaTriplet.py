@@ -63,7 +63,8 @@ Kdist=Cp_s / (rho_f * Cp_f)                              # thermal distribution 
 crho_ref = T_amb
 visc_ref = 0.00002394*10**(248.37/(crho_ref+133.15))  # reference viscosity (VOSS 1982)
 
-
+Tbh = T_room + T_loss_building          # return temperature from HVAC
+Tbc = T_room - T_loss_building          # return temperature cooling from HVAC
 Tmax=0       # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
 Tmin=T_amb        # please note: seawat uses a linear approximation of this relation
 

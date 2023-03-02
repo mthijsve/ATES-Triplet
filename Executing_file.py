@@ -66,7 +66,7 @@ densflow = 1     # turn densityflow off or on by switching the VDF packages off 
 WaterDensON = 1  # Calculation of parameters standard =1
 
 '''correction factors determine the recharge of the wells by multiplying the needed flow to meet the demand by the factor'''
-corr_w = 1.6      # correction factor hot well
+corr_w = 1.5      # correction factor hot well
 corr_1 = corr_w   # startup correction factor, only applied to hot well.
 corr_c = 1.0      # correction factor cold well
 
@@ -79,8 +79,9 @@ for i in well_obj_list:       # Update each active Python well object with the t
         
 cutofftemp_c = T_amb-2   # Temperature when the heating turns off, thus no more discharge from the hot well
 
-Tbh = 24          # return temperature from HVAC
-Tbc = 18          # return temperature cooling from HVAC
+T_room = 20                 # Room temperature in building, used for return temperature groundwater after heat exchanger
+T_loss_building = 2         # degrees that the return temperature deviates from room temperature. The higher, the bigger the losses in the HVAC system. 
+
 
 
 '''grid settings '''
@@ -91,13 +92,13 @@ ICBUND_Down = -1     # BOTTOM: -1 = boundary has constant temperature (NO Flow, 
 OutsideAirBound = 0  # 1 = ON, 0=OFF, if ON: the temperature boundary at model top is adjusted following outside air temperature 
 steady = True        # Switch for steady-state/transient Modflow simulation
 
-dmin = 2            # smallest cel size at well [m]
+dmin = 1              # smallest cel size at well [m]
 dmin_bound = 200      # total distance from well with 'dmin' sized cells [m]
 dmax = 200            # largest cell size at model boundary [m]
 aroundAll = 1000      # normal=1500 [m] size of grid around well.
 nstep = 20            # minimum number of steps that gridfunctions must add  to acquire the dmax size requirement [-]
 grid_extents = None   # example:[-300,300,-300,300] #set model boundaries [m]
-dz = 5                # vertical gridlayer thickness [m]  important to syncronize with layer thicknesses in csv file!
+dz = 1                # vertical gridlayer thickness [m]  important to syncronize with layer thicknesses in csv file!
 #%%
 
 exec(open('PySeawaTriplet.py').read())
