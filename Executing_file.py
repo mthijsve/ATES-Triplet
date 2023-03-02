@@ -10,8 +10,8 @@ from functions_triplet import *
 from flow_function_Triplet import *
 
 
-WD = r'C:\Users\msvanesch\Documents\08-Python_Scripts\PySeawaTriplet'
-os.chdir(WD)       # Set the proper working directory (WD)
+WD = os.getcwd()
+print(WD)
 
 '''Define input files'''
 swtexe_name = 'swt_v4x64.exe' 
