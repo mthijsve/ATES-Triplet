@@ -23,9 +23,13 @@ for i in range(len(perlent)):
             dz = dzt[k]           
 
             '''Set name for run''' 
+            p = str(perlen)
+            x = str(dmin)
+            z = str(dz)
+
             naam = 'test'
-            case = str(perlen + dmin + dz)
+            case = 't' + p.replace('.','') +'_x' + x.replace('.','') +'_z' + z.replace('.','')
             name = naam + case
+            print(name)
             exec(open('setup.py').read())
             exec(open('PySeawaTriplet.py').read())
-            print(name)

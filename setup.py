@@ -10,6 +10,7 @@ wellfile = 'wells.csv'
 demandfile = 'demand.csv'     
 subsurffile = 'sub-surface.csv'     
 monitoringfile = 'monitoring.csv'
+from pathlib import Path
 
 #%%create the objects needed
 well_obj_list = createobjfromCSV(PyWell,wellfile) #creates well object from  data in csv file
@@ -22,7 +23,7 @@ nW=len(well_obj_list)         # numer of wells
 T_amb = form_obj_list[0].s1   # Ambient Temperature of the subsurface
 PEFF = form_obj_list[0].por   # porosity [-]
 
-dirs = WD+'/output/'+name                                                      
+dirs = Path(WD + '/output/' + name)                                                      
 if os.path.exists(dirs)==False:
     os.makedirs(dirs)
 

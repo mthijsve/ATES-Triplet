@@ -112,21 +112,21 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     flowcold = i.flow
                     chargecold = i.charge
                     
-        plt.figure()
-        plt.plot(-flowwarm,label='heating demand',color='#EC6842')
-        plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-flowwarm,label='heating demand',color='#EC6842')
+        # plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
         
-        plt.figure()
-        plt.plot(-chargewarm,label='heating charge',color='#EC6842')
-        plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show() 
+        # plt.figure()
+        # plt.plot(-chargewarm,label='heating charge',color='#EC6842')
+        # plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show() 
         
     if flowtype == 1: #block function energy needed, charge block function throughout the year
         
@@ -210,21 +210,21 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     flowcold = i.flow
                     chargecold = i.charge
                     
-        plt.figure()
-        plt.plot(-flowwarm,label='heating demand',color='#EC6842')
-        plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-flowwarm,label='heating demand',color='#EC6842')
+        # plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
         
-        plt.figure()
-        plt.plot(-chargewarm,label='heating charge',color='#EC6842')
-        plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-chargewarm,label='heating charge',color='#EC6842')
+        # plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
 
                     
     if flowtype == 2: #sine function heat/cold (J), charge well next season with sine function
@@ -250,13 +250,13 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                 i.flow = i.flow.clip(max=0)
                 flowcold = i.flow
         
-        plt.figure()
-        plt.plot(-flowwarm,label='heating demand',color='#EC6842')
-        plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-flowwarm,label='heating demand',color='#EC6842')
+        # plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
         
         for i in well_obj_list:
             if i.type == 'warm':
@@ -279,13 +279,13 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                 i.charge = i.charge.clip(min=0)
                 chargecold = i.charge
                 
-        plt.figure()
-        plt.plot(-chargewarm,label='heating charge',color='#EC6842')
-        plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()            
+        # plt.figure()
+        # plt.plot(-chargewarm,label='heating charge',color='#EC6842')
+        # plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()            
                 
     if flowtype == 3: #sine function heat/cold, charge well according to sine function through whole year
         for i in well_obj_list:
@@ -309,13 +309,13 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                 i.flow = i.flow.clip(max=0)
                 flowcold = i.flow
         
-        plt.figure()
-        plt.plot(-flowwarm,label='heating demand',color='#EC6842')
-        plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-flowwarm,label='heating demand',color='#EC6842')
+        # plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
         
         for i in well_obj_list:
             if i.type == 'warm':
@@ -335,13 +335,13 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                         i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*i.Qy/PerPerYear + i.Qy/PerPerYear
                 chargecold = i.charge
                 
-        plt.figure()
-        plt.plot(-chargewarm,label='heating charge',color='#EC6842')
-        plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()                      
+        # plt.figure()
+        # plt.plot(-chargewarm,label='heating charge',color='#EC6842')
+        # plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()                      
                 
     if flowtype == 4:
         '''supply total demand in "demand.csv'''
@@ -361,19 +361,19 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             flowcold = i.flow
             chargecold = i.charge
             
-        plt.figure()
-        plt.plot(-flowwarm,label='heating demand')
-        plt.plot(-flowcold,label='cooling demand')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()
+        # plt.figure()
+        # plt.plot(-flowwarm,label='heating demand')
+        # plt.plot(-flowcold,label='cooling demand')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()
         
                         
-        plt.figure()
-        plt.plot(-chargewarm,label='heating charge')
-        plt.plot(-chargecold,label='cooling charge')
-        plt.ylabel('J/day')
-        plt.xlabel('day')
-        plt.legend()
-        plt.show()          
+        # plt.figure()
+        # plt.plot(-chargewarm,label='heating charge')
+        # plt.plot(-chargecold,label='cooling charge')
+        # plt.ylabel('J/day')
+        # plt.xlabel('day')
+        # plt.legend()
+        # plt.show()          

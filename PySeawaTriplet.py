@@ -322,25 +322,25 @@ Run_output.to_csv(os.path.join(dirs)+'/Run_output__'+name+'.csv')
 
 days = np.zeros(rl)
 for i in range(rl):
-    days[i] = perlen*(i+1)
+     days[i] = perlen*(i+1)
 colors = ['r','k','b', 'g', 'c', 'y','grey', 'violet', 'dodgerblue','firebrick','coral','yellow', 'lightgreen', 'orange','firebrick','cyan']
                    
-''' Temperatures and discharge'''
-fig, (ax0, ax1, ax2)  = plt.subplots(nrows=3, sharex=True)
-ax0.set_title('Discharge of wells',fontsize=10)
-im0 = ax0.plot(days,Run_output.loc[:,'W0_Vin'] + Run_output.loc[:,'W0_Vout'], color=colors[0], label=well_obj_list[0].type)
-im1 = ax1.plot(days,Run_output.loc[:,'W1_Vin'] + Run_output.loc[:,'W1_Vout'], color=colors[1], label=well_obj_list[1].type)
-im2 = ax2.plot(days,Run_output.loc[:,'W2_Vin'] + Run_output.loc[:,'W2_Vout'], color=colors[2], label=well_obj_list[2].type)
-ax1.set_ylabel('well discharge [m3/day]',fontsize=10)
+# ''' Temperatures and discharge'''
+# fig, (ax0, ax1, ax2)  = plt.subplots(nrows=3, sharex=True)
+# ax0.set_title('Discharge of wells',fontsize=10)
+# im0 = ax0.plot(days,Run_output.loc[:,'W0_Vin'] + Run_output.loc[:,'W0_Vout'], color=colors[0], label=well_obj_list[0].type)
+# im1 = ax1.plot(days,Run_output.loc[:,'W1_Vin'] + Run_output.loc[:,'W1_Vout'], color=colors[1], label=well_obj_list[1].type)
+# im2 = ax2.plot(days,Run_output.loc[:,'W2_Vin'] + Run_output.loc[:,'W2_Vout'], color=colors[2], label=well_obj_list[2].type)
+# ax1.set_ylabel('well discharge [m3/day]',fontsize=10)
 
-plt.grid(True, 'minor', lw=1, c='grey')   
-plt.legend() 
+# plt.grid(True, 'minor', lw=1, c='grey')   
+# plt.legend() 
 
-fig, (ax1) = plt.subplots(nrows=1, sharex=True)
-ax1.set_title('Temperature  wells [C]',fontsize=10)
-for i in range(nW):
-    im1 = ax1.plot(days,Run_output.loc[:,'W'+str(i)+'_T_mf_out'], color=colors[i], label=well_obj_list[i].type),
-ax1.set_ylabel('Temperature filter screens [C]',fontsize=10) 
-ax1.set_facecolor('lightgrey')
-plt.grid(True, 'major', lw=1, c='w') 
-plt.show()
+# fig, (ax1) = plt.subplots(nrows=1, sharex=True)
+# ax1.set_title('Temperature  wells [C]',fontsize=10)
+# for i in range(nW):
+#     im1 = ax1.plot(days,Run_output.loc[:,'W'+str(i)+'_T_mf_out'], color=colors[i], label=well_obj_list[i].type),
+# ax1.set_ylabel('Temperature filter screens [C]',fontsize=10) 
+# ax1.set_facecolor('lightgrey')
+# plt.grid(True, 'major', lw=1, c='w') 
+# plt.show()
