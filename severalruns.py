@@ -23,12 +23,12 @@ for i in range(len(perlent)):
             dz = dzt[k]           
 
             '''Set name for run''' 
-            p = str(perlen)
-            x = str(dmin)
-            z = str(dz)
+            p = str(perlen).replace('.','')
+            x = str(dmin).replace('.','')
+            z = str(dz).replace('.','')
 
             naam = 'test'
-            case = 't' + p.replace('.','') +'_x' + x.replace('.','') +'_z' + z.replace('.','')
+            case = 't' + p +'_x' + x +'_z' + z
             name = naam + case
             print(name)
             exec(open('setup.py').read())
