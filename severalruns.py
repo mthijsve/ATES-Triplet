@@ -6,9 +6,9 @@ from flow_function_Triplet import *
 WD = os.getcwd()
 print(WD)
 
-perlent = [10]    # (DAYS)
-dmint = [0.5]              # smallest cel size at well [m]
-dzt = [0.5,1,2,5,10]                # vertical gridlayer thickness [m]  important to syncronize with layer thicknesses in csv file!
+perlent = [1]            # (DAYS)
+dmint = [1]              # smallest cel size at well [m]
+dzt = [1]                # vertical gridlayer thickness [m]  important to syncronize with layer thicknesses in csv file!
 
 dmin_bound = 200      # total distance from well with 'dmin' sized cells [m]
 dmax = 200            # largest cell size at model boundary [m]

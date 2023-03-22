@@ -162,36 +162,15 @@ for period in range(rl):
    
         for i in well_obj_list:
             if i.type == 'warm':
-                if period < ppy: 
-                    if T_a_h < cutofftemp_h:
-                        i.Q = corr_1 * pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)
-                        Qh = 0
-                    else:
-                        i.Q = pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw) * corr_1
-                        Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
-                else:
-                    if T_a_h < cutofftemp_h:
-                        i.Q = corr_w*pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)
-                        Qh = 0
-                    else:
-                        i.Q = pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_w
-                        Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
+                i.Q = i.flow[period] + i.charge[period]
                 temp_QH = i.Q
                                             
             if i.type == 'cold':
-                if T_a_c <cutofftemp_c:
-                    i.Q = pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c
-                    Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
-                else:
-                    Qc = 0
-                    i.Q = pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c
-                    
+                i.Q = i.flow[period] + i.charge[period]
                 temp_QC = i.Q
-                
+
             if i.type == 'buffer':
                 i.Q = -temp_QH -temp_QC
-                if Qc+Qh >0:
-                    i.T_inj = (Qh*Tbh + Qc*Tbc)/(Qc+Qh)
                 
     well_LRCQ_list = create_LRCQ_list(well_obj_list, grid_obj)                  # Set the settings of the wells for that timestep
     ssm_data = create_conc_list(well_obj_list, attrib='T_inj') 
