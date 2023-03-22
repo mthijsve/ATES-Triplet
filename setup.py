@@ -28,7 +28,7 @@ if os.path.exists(dirs)==False:
     os.makedirs(dirs)
 
 '''main time setting parameters'''
-perlen = 1    # (DAYS)
+#perlen = 1    # (DAYS)
 years = 5        # set the minimum #years that a system will run
 ppy = 365/perlen                                                       
 
@@ -59,7 +59,6 @@ Thmin = 5          #Thmin is the temperature difference in the hot well between 
 
 for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
     if i.type == 'warm':
-        print(i.T_inj)
         cutofftemp_h = i.T_inj-Thmin
         
 cutofftemp_c = T_amb-2   # Temperature when the heating turns off, thus no more discharge from the hot well
