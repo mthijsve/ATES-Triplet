@@ -140,7 +140,7 @@ calc_demand(well_obj_list, perlen=perlen, flowtype=flowtype, run_length=rl, year
 ''' Create SEAWAT model '''                                                     # set all the fixed conditions that don't change while running etc.
 mswtf = swt.Seawat(name, 'nam_swt',exe_name=swtexe_name,
                    model_ws=dirs)
-
+#to change to hours, add itmuni here, see documentation for options
 discret = mf.ModflowDis(mswtf, nrow=int(grid_obj.nrow), ncol=int(grid_obj.ncol), nlay=grid_obj.nlay,
                  delr=grid_obj.delr, delc=grid_obj.delc, laycbd=0., top=grid_obj.top, 
                  botm=grid_obj.botm, nper=nper, perlen=perlen, nstp=nstp, steady=steady)
