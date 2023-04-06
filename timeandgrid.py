@@ -69,7 +69,7 @@ for i in timestep:
     plt.figure()
     ax = sns.heatmap(pv,vmin = 41,vmax = 45,annot=True,fmt=".2f")
     ax.set_xticks([0.5,1.5,2.5,3.5,4.5],['0.5','1','2','5','10'])
-    ax.set_yticks([0.5,1.5,2.5,3.5],['0.5','1','2','5'])
+    ax.set_yticks([0.5,1.5,2.5,3.5,4.5],['0.5','1','2','5','10'])
     ax.set_title('timestep:'+str(i)+' - '+v)
     ax.invert_yaxis()
     plt.savefig(os.path.join(imagesOut,str(i)+str(v)+'.png'))
