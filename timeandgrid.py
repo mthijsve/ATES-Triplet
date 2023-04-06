@@ -41,13 +41,16 @@ def AllDataFromFiles(files):
             data[i] = 0.5
         else:
             data[i] = float(data[i])
+            
     dfexp = pd.DataFrame({'dt':[data[0]],'x':[data[1]],'z':[data[2]]})
     dfexp['dnm'] = df['dnmh'].sum()
     dfexp['dnm'] = dfexp['dnm'].multiply(data[0])
-    dfexp['V_h'] = df['W0_Vin'].sum()+df['W0_Vout'].sum()
+    dfexp['V_h_in'] = df['W0_Vin'].sum()
+    dfexp['V_h_out']= df['W0_Vout'].sum()
     dfexp['V_c'] = df['W1_Vin'].sum()+df['W1_Vout'].sum()
     dfexp['V_m'] = df['W2_Vin'].sum()+df['W2_Vout'].sum()
     dfexp['T_h'] = df['W0_T_mf_out'].mean()
+    dfexp['Tempsum'] = df['W0_T_mf_out'].sum()*dfexp['dt']
     dfexp['T_c'] = df['W1_T_mf_out'].mean()
     dfexp['T_m'] = df['W2_T_mf_out'].mean()
     return dfexp
@@ -57,30 +60,17 @@ for i in files:
 df.sort_values(by=['dt'], axis = 0, inplace=True)
 df.set_index(keys=['dt'],drop=False,inplace=True)
 timestep = df['dt'].unique().tolist()
-vls = ['dnm','V_h','V_c','V_m','T_h','T_c','T_m']
+vls = ['dnm','V_h_in','V_h_out','V_c','V_m','T_h','Tempsum','T_c','T_m']
 for i in timestep:
-    v='T_h'
-    if i == 10:
-        x = [1,2,5,10]
-        z = [1,2,5,10]
-        pv = pd.pivot_table(df.loc[df['dt']==i],values=v,index='z',columns='x')
-        plt.figure()
-        ax = sns.heatmap(pv,vmin = 47,vmax = 54,annot=True,fmt=".2f")
-        ax.set_xticks([0.5,1.5,2.5,3.5],['1','2','5','10'])
-        ax.set_yticks([0.5,1.5,2.5,3.5],['1','2','5','10'])
-        ax.set_title('timestep:'+str(i)+' - '+v)
-        ax.invert_yaxis()
-        plt.savefig(os.path.join(imagesOut,str(i)+str(v)+'.png'))
-    
-    else:
-        x = [0.5,1,2,5,10]
-        z = [0.5,1,2,5,10]
-        pv = pd.pivot_table(df.loc[df['dt']==i],values=v,index='z',columns='x')
-        plt.figure()
-        ax = sns.heatmap(pv,vmin = 47,vmax = 54,annot=True,fmt=".2f")
-        ax.set_xticks([0.5,1.5,2.5,3.5,4.5],['0.5','1','2','5','10'])
-        ax.set_yticks([0.5,1.5,2.5,3.5,4.5],['0.5','1','2','5','10'])
-        ax.set_title('timestep:'+str(i)+' - '+v)
-        ax.invert_yaxis()
-        plt.savefig(os.path.join(imagesOut,str(i)+str(v)+'.png'))
+    v='dnm'
+    x = [0.5,1,2,5,10]
+    z = [0.5,1,2,5,10]
+    pv = pd.pivot_table(df.loc[df['dt']==i],values=v,index='z',columns='x')
+    plt.figure()
+    ax = sns.heatmap(pv,vmin = 41,vmax = 45,annot=True,fmt=".2f")
+    ax.set_xticks([0.5,1.5,2.5,3.5,4.5],['0.5','1','2','5','10'])
+    ax.set_yticks([0.5,1.5,2.5,3.5],['0.5','1','2','5'])
+    ax.set_title('timestep:'+str(i)+' - '+v)
+    ax.invert_yaxis()
+    plt.savefig(os.path.join(imagesOut,str(i)+str(v)+'.png'))
     

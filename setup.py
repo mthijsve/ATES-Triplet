@@ -12,6 +12,7 @@ subsurffile = 'sub-surface.csv'
 monitoringfile = 'monitoring.csv'
 from pathlib import Path
 
+
 #%%create the objects needed
 well_obj_list = createobjfromCSV(PyWell,wellfile) #creates well object from  data in csv file
 form_obj_list = createobjfromCSV(PySystem,subsurffile)
@@ -26,11 +27,11 @@ PEFF = form_obj_list[0].por   # porosity [-]
 dirs = Path(WD + '/output/' + name)                                                      
 if os.path.exists(dirs)==False:
     os.makedirs(dirs)
-
 '''main time setting parameters'''
 #perlen = 1    # (DAYS)
-years = 5        # set the minimum #years that a system will run
+years = 2        # set the minimum #years that a system will run
 ppy = 365/perlen                                                       
+rl = int(round (365 * years / perlen, 0)) # run length
 
 startwinter = 1 # simulation starts in winter (1) or summer (0). for distribution of flows of wells and surface temperature
         
@@ -41,6 +42,8 @@ nprs = len(timprs)
 
 repeatrun = 0     # repeatrun starts the run with the last temperature file of the previous run as initial conditions
 finaltimestep = 365/perlen*years-1
+
+
 
 '''Model flow input'''
 flowtype = 2     # choise between 0 and 4, see readme
@@ -55,14 +58,15 @@ corr_w = 1.5      # correction factor hot well
 corr_1 = corr_w   # startup correction factor, only applied to hot well.
 corr_c = 1.0      # correction factor cold well
 
-Thmin = 5          #Thmin is the temperature difference in the hot well between the injection temperature and the cutoff temperature
+Thmin = 10          #Thmin is the temperature difference in the hot well between the injection temperature and the cutoff temperature
 
 for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
     if i.type == 'warm':
         cutofftemp_h = i.T_inj-Thmin
-        
+        Tmax =  i.T_inj  # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
 cutofftemp_c = T_amb-2   # Temperature when the heating turns off, thus no more discharge from the hot well
-
+ 
+Tmin = 5        # please note: seawat uses a linear approximation of this relation
 T_room = 20                 # Room temperature in building, used for return temperature groundwater after heat exchanger
 T_loss_building = 2         # degrees that the return temperature deviates from room temperature. The higher, the bigger the losses in the HVAC system. 
 

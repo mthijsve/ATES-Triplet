@@ -63,10 +63,9 @@ Kdist=Cp_s / (rho_f * Cp_f)                              # thermal distribution 
 crho_ref = T_amb
 visc_ref = 0.00002394*10**(248.37/(crho_ref+133.15))  # reference viscosity (VOSS 1982)
 
-Tbh = T_room + T_loss_building          # return temperature from HVAC
-Tbc = T_room - T_loss_building          # return temperature cooling from HVAC
-Tmax=0       # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
-Tmin=T_amb        # please note: seawat uses a linear approximation of this relation
+Tbh  = T_room + T_loss_building          # return temperature from HVAC
+Tbc  = T_room - T_loss_building          # return temperature cooling from HVAC
+
 
 for i in range(len(well_obj_list)):
     if well_obj_list[i].T_inj > Tmax:
@@ -81,7 +80,6 @@ drhodT = (denseref - densemin) / (Tmin - Tmax) # linear relationship between T a
 #%% [C] Grid creations and model initialization
 
 '''run period info'''
-rl = int(round (365 * years / perlen, 0)) # run length
 Run_info = pd.DataFrame()                 # create run info dataframe
 Run_info.loc[0,'Period'] = 0
 Run_info.loc[0,'Day'] = 0
@@ -117,7 +115,8 @@ if OutsideAirBound == 1:
 
 if repeatrun ==1:    
     tempt = bf.UcnFile(os.path.join(dirs, name+str(int(finaltimestep))+'S1'+'.UCN'))
-    grid_obj.temp = tempt.get_data(totim=perlen) 
+    grid_obj.temp = tempt.get_data(totim=perlen)
+    #add heads as initial condition
 
 '''monitoring Layer, Row, Column number in grid'''
 mon_LRC_list = init_monitoring(grid_obj, mon_obj_list, dz, nmon, AXI)
@@ -162,11 +161,11 @@ for period in range(rl):
    
         for i in well_obj_list:
             if i.type == 'warm':
-                i.Q = i.flow[period] + i.charge[period]
+                i.Q = i.flow[period]/perlen + i.charge[period]/perlen
                 temp_QH = i.Q
                                             
             if i.type == 'cold':
-                i.Q = i.flow[period] + i.charge[period]
+                i.Q = i.flow[period]/perlen + i.charge[period]/perlen
                 temp_QC = i.Q
 
             if i.type == 'buffer':
@@ -204,6 +203,7 @@ for period in range(rl):
         vdf = swt.SeawatVdf(mswtf, mtdnconc=-1, nsrhoeos=1, nswtcpl=1, iwtable=0, densemin=0, densemax=0, denseref=denseref,
                             mtrhospec=1,denseslp=drhodT,crhoref=crho_ref)
         vsc = swt.SeawatVsc(mswtf, mt3dmuflg=-1, viscmin=0.0, viscmax=0.0, viscref=visc_ref, #Viscref must be set to the reference viscosity at T=12 --> 
+                            nsmueos=1, mtmutempspec=1, mutempopt=1, amucoeff=(2.39e-5, 10, 248.4, 133.2),  # temp is used to calc visc. according to Eq. 18 langevin et al 2008
                             mtmuspec=2, dmudc=1.923e-06, cmuref=0.0,                # solute influence on viscocity
                             invisc=-1, visc=-1, extension='vsc')
     
@@ -244,10 +244,10 @@ for period in range(rl):
     for j in range(len(well_obj_list)):
         if well_obj_list[j].Q >0:
             Run_output.loc[period,'W'+str(j)+'_Vin'] =  0
-            Run_output.loc[period,'W'+str(j)+'_Vout'] =  well_obj_list[j].Q
+            Run_output.loc[period,'W'+str(j)+'_Vout'] =  well_obj_list[j].Q*perlen
             Ttemp = well_obj_list[j].T_modflow
         else:
-            Run_output.loc[period,'W'+str(j)+'_Vin'] = well_obj_list[j].Q
+            Run_output.loc[period,'W'+str(j)+'_Vin'] = well_obj_list[j].Q*perlen
             Run_output.loc[period,'W'+str(j)+'_Vout'] = 0  
             Ttemp = well_obj_list[j].T_modflow
             
