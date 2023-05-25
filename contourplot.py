@@ -29,7 +29,7 @@ X,Z=grid_obj.sumdelr, grid_obj.botm[:,0,0]
 
 Z1 = int(np.around(np.average(well_obj_list[0].L)))
 for i in range(len(grid_obj.sumdelr)):
-    if grid_obj.sumdelr[i] < 300:                                               # right boundary of contour plots in m from well loaction
+    if grid_obj.sumdelr[i] < 150:                                               # right boundary of contour plots in m from well loaction
         a = i
     ResCol= int(a+1)
 
@@ -99,7 +99,8 @@ for i in range(len(plots)):
     t_obj = bf.UcnFile(os.path.join(dirs, name+str(t)+'S1'+'.UCN'))
     temp1 = t_obj.get_data(totim=perlen)
     t_obj.close()
-    fig, (ax2, ax3)  = plt.subplots(nrows=2, sharex=True) 
+
+    fig, (ax2)  = plt.subplots(nrows=1, sharex=True,figsize=(7,4),layout='tight') 
     im2 = ax2.contour(X[0:ResCol], Z, temp1[:,0,0:ResCol],
                         colors=('black'), linestyles=('dotted'), linewidths=1,levels = T2level_w)
     ax2.clabel(im2, im2.levels,fmt = '%1.1f')
@@ -119,23 +120,5 @@ for i in range(len(plots)):
     props = dict(boxstyle='round', facecolor='w', alpha=0.5)
     ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
-    im3 = ax3.contour(X[0:ResCol], Z, temp1[:,2,0:ResCol],
-                        colors=('black'), linestyles=('dotted'), linewidths=1,levels = T2level_w)
-    ax3.clabel(im3, im3.levels,fmt = '%1.1f'), 
-    im3 = ax3.contourf(X[0:ResCol], Z, temp1[:,2,0:ResCol],cmap='seismic', levels = Tlevel) 
-    fig.colorbar(im3, ax=ax3, format = '%1.0f')
-    for i in range(nW):
-        ax3.plot(xw, welltops[i], color = 'k') 
-        ax3.plot(xw, wellbots[i], color = 'k')
-        ax3.fill_between(xw, welltops[i], wellbots[i], color = 'k')
-    for i in range(n_aqt):
-        ax3.plot(X[0:ResCol], aqttops[i], color = 'grey', alpha = 0.6)
-        ax3.plot(X[0:ResCol], aqtbots[i], color = 'grey', alpha = 0.6)
-        ax3.fill_between(X[0:ResCol], aqttops[i], aqtbots[i], color = 'grey', alpha = 0.6)
-    ax3.set_title('Temperature [C] of '+well_obj_list[1].type+'-well')
-    ax3.set_ylabel('aquifer depth [m]')
-    plt.xlabel('distance from well location [m]')
-    props = dict(boxstyle='round', facecolor='w', alpha=0.5)
-    ax3.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=10, verticalalignment='top', bbox=props)
     direct = os.path.join('Images',str(name)+str(t)+'.png')
     fig.savefig(direct, dpi=300) 

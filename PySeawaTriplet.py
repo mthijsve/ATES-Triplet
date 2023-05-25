@@ -11,7 +11,7 @@ The author takes no responsibility for any damage that may follow from
 using or implementing (the results produced by) this model infrastructure
 
 """
-#%% [A] all imports and paths
+#%% [A] all imports and paths, set directories and setup
 
 import os
 import sys
@@ -30,51 +30,6 @@ import flopy.utils.binaryfile as bf
 
 from functions_triplet import *
 from flow_function_Triplet import *
-
-
-#%% [B] Detailed MODFLOW/geohydr. inputs. Default conductivities and porosity - assumed constant for  model, can be handled as arrays like temperature/head
-
-
-''' basic parameter settings'''
-al = 0.5                                 # dispersivity [m]                                 
-trpv = 0.005                             # trans dispersivity [m]                           
-trpt = 0.05                              # transv. dispersivity [m]
-
-rho_s = 2640.                            # density solids [kg/m3]
-rho_f = 1000.                            # density fluids [kg/m3]
-rho_b = rho_s * (1-PEFF) + rho_f * PEFF  # bulk density [kg/m3]
-
-'''thermal properties'''
-Cp_s = 710                                               # specific. heatcapacity [J/kg/K]
-Cp_f = 4183.                                             # specific. heatcapacity [J/kg/K]
-Cw = Cp_f * rho_f                                        # volumetric heatcapacity [J/m3/K]
-Cs = Cp_s * rho_s                                        # volumetric heatcapacity [J/m3/K]
-Caq =  Cs * (1-PEFF) + Cw * PEFF                         # volumetric aqufier heatcapacity
-kT_s = 2.                                                # thermal conductivity sandy solids [W/m/K]
-kT_clay = 1.7                                            # thermal conductivity clayy solids [W/m/K]
-kT_f = 0.58                                              # thermal conductivity water [W/m/K]
-kT_aq = kT_s * (1-PEFF) + kT_f * PEFF                    # thermal conductivity aquifer bulk
-kT_aqt = kT_clay * (1 - PEFF) + kT_f * PEFF              # thermal conductivity aquitard bulk
-Tdif_aq = kT_aq / (PEFF * rho_f * Cp_f) * 24 * 3600      # thermal diffusivity, deals with conduction in dsp package
-Tdif_aqt = kT_aqt / (PEFF * rho_f * Cp_f) * 24 * 3600 
-Kdist=Cp_s / (rho_f * Cp_f)                              # thermal distribution coeff, deals with thermal retardation in rct package
-
-'''Seawat parameters'''
-crho_ref = T_amb
-visc_ref = 0.00002394*10**(248.37/(crho_ref+133.15))  # reference viscosity (VOSS 1982)
-
-Tbh  = T_room + T_loss_building          # return temperature from HVAC
-Tbc  = T_room - T_loss_building          # return temperature cooling from HVAC
-
-
-for i in range(len(well_obj_list)):
-    if well_obj_list[i].T_inj > Tmax:
-        Tmax = well_obj_list[i].T_inj
-    if well_obj_list[i].T_inj < Tmin:
-        Tmin = well_obj_list[i].T_inj
-denseref = 1000 - (((Tmin - 4)**2) / 207)      # reference density
-densemin = 1000 - (((Tmax - 4)**2) / 207)      # minimum density (maximum temperature)
-drhodT = (denseref - densemin) / (Tmin - Tmax) # linear relationship between T and p
 
 
 #%% [C] Grid creations and model initialization
@@ -113,11 +68,6 @@ set_geo_prop(grid_obj, form_obj_list, gwflow_x=gwflow_x, gwflow_y=gwflow_y, dz=d
 if OutsideAirBound == 1:
     set_Tboundary(grid_obj,  perlen=perlen, run_length=rl, Tmin=5, Tmax=20, startwinter = startwinter)  # sets varying temperature at surface level. 
 
-if repeatrun ==1:    
-    tempt = bf.UcnFile(os.path.join(dirs, name+str(int(finaltimestep))+'S1'+'.UCN'))
-    grid_obj.temp = tempt.get_data(totim=perlen)
-    #add heads as initial condition
-
 '''monitoring Layer, Row, Column number in grid'''
 mon_LRC_list = init_monitoring(grid_obj, mon_obj_list, dz, nmon, AXI)
 RES = np.zeros((rl,len(mon_LRC_list)))                                          # results file for monitoring points
@@ -135,7 +85,7 @@ ssm_data[0] = [[0, 0, 0, 0, itype['WEL']]]
 laytyp = np.zeros([grid_obj.nlay])                                              # All confined layers
 
 '''calculate flows '''
-calc_demand(well_obj_list, perlen=perlen, flowtype=flowtype, run_length=rl, years=years, startwinter=startwinter) # calculates flows during simulation
+calc_demand(well_obj_list, Qyh , Qyc, perlen=perlen, flowtype=flowtype, run_length=rl, years=years, startwinter=startwinter) # calculates flows during simulation
 ''' Create SEAWAT model '''                                                     # set all the fixed conditions that don't change while running etc.
 mswtf = swt.Seawat(name, 'nam_swt',exe_name=swtexe_name,
                    model_ws=dirs)
@@ -152,25 +102,60 @@ T_a_c = T_amb
 T_a_b = T_amb 
 
 for period in range(rl):
+
     if OutsideAirBound == 1:
         grid_obj.temp[0,:,:]= grid_obj.SurfaceT[period]# sets temperature at surface level according to time of year
     temp_QH=0
     temp_QC=0
 
-    if well_obj_list:  # Create well and temperature lists following Modflow/MT3DMS format. Each timestep, flows and infiltration temp are assigned to the wells
-   
+    if well_obj_list:  # Create well and temperature lists following Modflow/MT3DMS format. Each timestep, flows and infiltration temp are assigned to the wells  
         for i in well_obj_list:
-            if i.type == 'warm':
-                i.Q = i.flow[period]/perlen + i.charge[period]/perlen
-                temp_QH = i.Q
-                                            
-            if i.type == 'cold':
-                i.Q = i.flow[period]/perlen + i.charge[period]/perlen
-                temp_QC = i.Q
+            if i.type == 'warm':   
+                if period < ppy*startup_years:           
+                    if T_a_h < cutofftemp_h:
+                        i.Q = corr_ws*pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)/perlen
+                        Qh = 0
+                    else:
+                        i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_ws)/perlen
+                        Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
+                    temp_QH = i.Q
+                else:
+                    if T_a_h < cutofftemp_h:
+                        i.Q = corr_w*pumpingrate(i.flow[period], T_a_h, Tbh,Cw)/perlen
+                        Qh = 0
+                    else:
+                        i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_w)/perlen
+                        Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
+                    temp_QH = i.Q
 
+            if i.type == 'cold':
+                if period < ppy*startup_years:
+                    if T_a_c <cutofftemp_c:
+                        i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_cs)/perlen
+                        
+                        Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
+                    else:
+                        Qc = 0
+                        i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_cs)/perlen
+                    temp_QC = i.Q
+                
+                else:
+                    if T_a_c <cutofftemp_c:
+                        i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
+                        Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
+                    else:
+                        Qc = 0
+                        i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
+                        
+                    temp_QC = i.Q
+                
             if i.type == 'buffer':
                 i.Q = -temp_QH -temp_QC
-                
+               
+                if Qc+Qh >0:
+                    i.T_inj = (Qh*Tbh + Qc*Tbc)/(Qc+Qh)
+
+    
     well_LRCQ_list = create_LRCQ_list(well_obj_list, grid_obj)                  # Set the settings of the wells for that timestep
     ssm_data = create_conc_list(well_obj_list, attrib='T_inj') 
     
@@ -210,19 +195,24 @@ for period in range(rl):
     mswtf.write_input()
     m = mswtf.run_model(silent=True)   #Run SEAWAT!      (silent=FALSE gives details for each timestep, silent=TRUE only gives end signal in the console)
     
-    '''Copy Modflow/MT3DMS output to new files so they wont be overwritten in next timestep.'''
-    shutil.copyfile(os.path.join(dirs, name+'.hds'),
-                    os.path.join(dirs, name+str(period)+'.hds'))
-    shutil.copyfile(os.path.join(dirs, 'MT3D001.UCN'),
-                    os.path.join(dirs, name+str(period)+'S1'+'.UCN'))
 
-
-    '''Create head & concentrations file object and read head & concentrations arrays for next simulation period'''
-    h_obj = bf.HeadFile(os.path.join(dirs, name+str(period)+'.hds'))
-    grid_obj.head = h_obj.get_data(totim=perlen)
-    t_obj = bf.UcnFile(os.path.join(dirs, name+str(period)+'S1'+'.UCN'))
-    grid_obj.temp = t_obj.get_data(totim=perlen)                
-
+    if savefiles == 1:
+        '''Copy Modflow/MT3DMS output to new files so they wont be overwritten in next timestep.'''
+        shutil.copyfile(os.path.join(dirs, name+'.hds'),
+                        os.path.join(dirs, name+str(period)+'.hds'))
+        shutil.copyfile(os.path.join(dirs, 'MT3D001.UCN'),
+                        os.path.join(dirs, name+str(period)+'S1'+'.UCN'))
+        '''Create head & concentrations file object and read head & concentrations arrays for next simulation period'''
+        h_obj = bf.HeadFile(os.path.join(dirs, name+str(period)+'.hds'))
+        grid_obj.head = h_obj.get_data(totim=perlen)
+        t_obj = bf.UcnFile(os.path.join(dirs, name+str(period)+'S1'+'.UCN'))
+        grid_obj.temp = t_obj.get_data(totim=perlen)                
+    else:
+        '''Create head & concentrations file object and read head & concentrations arrays for next simulation period'''
+        h_obj = bf.HeadFile(os.path.join(dirs, name+'.hds'))
+        grid_obj.head = h_obj.get_data(totim=perlen)
+        t_obj = bf.UcnFile(os.path.join(dirs, 'MT3D001.UCN'))
+        grid_obj.temp = t_obj.get_data(totim=perlen) 
 
     if well_obj_list:
         for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
@@ -242,7 +232,7 @@ for period in range(rl):
     
     '''save the info the the Run_output file'''
     for j in range(len(well_obj_list)):
-        if well_obj_list[j].Q >0:
+        if well_obj_list[j].Q <0:
             Run_output.loc[period,'W'+str(j)+'_Vin'] =  0
             Run_output.loc[period,'W'+str(j)+'_Vout'] =  well_obj_list[j].Q*perlen
             Ttemp = well_obj_list[j].T_modflow
@@ -257,12 +247,20 @@ for period in range(rl):
             Run_output.loc[period,'dnmh'] = Run_output.loc[period,'W'+str(j)+'_T_mf_out'] < cutofftemp_h            
             Run_output.loc[period,'Dens_water_in'] = denseref + drhodT * well_obj_list[j].T_inj
             Run_output.loc[period,'Dens_water_out'] = denseref + drhodT * well_obj_list[j].T_modflow
+            if period < ppy*startup_years:
+                Run_output.loc[period,'Efficiency_h'] = corr_ws
+            else:
+                Run_output.loc[period,'Efficiency_h'] = corr_w
         elif well_obj_list[j].type == 'cold':
             Run_output.loc[period,'W'+str(j)+'_T_sys_in'] = well_obj_list[j].T_inj
             Run_output.loc[period,'W'+str(j)+'_T_mf_out'] = well_obj_list[j].T_modflow
             Run_output.loc[period,'dnmc'] = Run_output.loc[period,'W'+str(j)+'_T_mf_out'] > cutofftemp_c 
             Run_output.loc[period,'Dens_water_in'] = denseref + drhodT * well_obj_list[j].T_inj
             Run_output.loc[period,'Dens_water_out'] = denseref + drhodT * well_obj_list[j].T_modflow
+            if period < ppy*startup_years:
+                Run_output.loc[period,'Efficiency_h'] = corr_cs
+            else:
+                Run_output.loc[period,'Efficiency_h'] = corr_c
         else:
             Run_output.loc[period,'W'+str(j)+'_T_sys_in'] = Ttemp
             Run_output.loc[period,'W'+str(j)+'_T_mf_out'] = well_obj_list[j].T_modflow
@@ -297,29 +295,8 @@ print ('Simulation completed, Runtime= '+str(round(elapsed_time,1))+' min')
 '''save run_output file'''
 Run_output.to_csv(os.path.join(dirs)+'/Run_output__'+name+'.csv')                
 
-#%% [E] plots
+mask2 = (Run_output['Period']> round(startup_years*ppy))
+#values dnm.. stands for demand not met (cold or hot)(startup period or not). This is used to calibrate the model. It should be 0 in the last year of startup and 0 in the years after
 
-days = np.zeros(rl)
-for i in range(rl):
-     days[i] = perlen*(i+1)
-colors = ['r','k','b', 'g', 'c', 'y','grey', 'violet', 'dodgerblue','firebrick','coral','yellow', 'lightgreen', 'orange','firebrick','cyan']
-                   
-# ''' Temperatures and discharge'''
-# fig, (ax0, ax1, ax2)  = plt.subplots(nrows=3, sharex=True)
-# ax0.set_title('Discharge of wells',fontsize=10)
-# im0 = ax0.plot(days,Run_output.loc[:,'W0_Vin'] + Run_output.loc[:,'W0_Vout'], color=colors[0], label=well_obj_list[0].type)
-# im1 = ax1.plot(days,Run_output.loc[:,'W1_Vin'] + Run_output.loc[:,'W1_Vout'], color=colors[1], label=well_obj_list[1].type)
-# im2 = ax2.plot(days,Run_output.loc[:,'W2_Vin'] + Run_output.loc[:,'W2_Vout'], color=colors[2], label=well_obj_list[2].type)
-# ax1.set_ylabel('well discharge [m3/day]',fontsize=10)
-
-# plt.grid(True, 'minor', lw=1, c='grey')   
-# plt.legend() 
-
-# fig, (ax1) = plt.subplots(nrows=1, sharex=True)
-# ax1.set_title('Temperature  wells [C]',fontsize=10)
-# for i in range(nW):
-#     im1 = ax1.plot(days,Run_output.loc[:,'W'+str(i)+'_T_mf_out'], color=colors[i], label=well_obj_list[i].type),
-# ax1.set_ylabel('Temperature filter screens [C]',fontsize=10) 
-# ax1.set_facecolor('lightgrey')
-# plt.grid(True, 'major', lw=1, c='w') 
-# plt.show()
+dnmh = Run_output['dnmh'].loc[mask2].count(True)
+print(dnmh)

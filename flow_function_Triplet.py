@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=None, climate = None,years=1, startwinter = 1 ):
+def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1, demand=None, climate = None,years=1, startwinter = 1 ):
     
     '''  Calculate the average daily flow of a well object, as required by
     the Modflow WEL package.
@@ -48,22 +48,22 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
+                            i.flow[k+l] = -Qyh/PerPerSeason
                             i.charge[k+l] = 0
 
                         if i.type =='cold':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason
+                            i.charge[k+l] = Qyc/PerPerSeason
                             
                     k=int(start_summer[j])
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason
+                            i.charge[k+l] = Qyh/PerPerSeason
                             
                         if i.type =='cold':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
+                            i.flow[k+l] = -Qyc/PerPerSeason
                             i.charge[k+l] = 0
                             
                 if i.type =='warm':
@@ -86,22 +86,22 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
+                            i.flow[k+l] = -Qyh/PerPerSeason
                             i.charge[k+l] = 0
 
                         if i.type =='cold':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason
+                            i.charge[k+l] = Qyc/PerPerSeason
                             
                     k=int(start_summer[j])
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason
+                            i.charge[k+l] = Qyh/PerPerSeason
                             
                         if i.type =='cold':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
+                            i.flow[k+l] = -Qyc/PerPerSeason
                             i.charge[k+l] = 0            
 
                 if i.type =='warm':
@@ -146,23 +146,23 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.flow[k+l] = -Qyh/PerPerSeason
+                            i.charge[k+l] = Qyh/PerPerSeason/2
 
                         if i.type =='cold':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.charge[k+l] = Qyc/PerPerSeason/2
                             
                     k=int(start_summer[j])
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.charge[k+l] = Qyh/PerPerSeason/2
                             
                         if i.type =='cold':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.flow[k+l] = -Qyc/PerPerSeason
+                            i.charge[k+l] = Qyc/PerPerSeason/2
                             
                 if i.type =='warm':
                     flowwarm = i.flow
@@ -184,23 +184,23 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.flow[k+l] = -Qyh/PerPerSeason
+                            i.charge[k+l] = Qyh/PerPerSeason/2
 
                         if i.type =='cold':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.charge[k+l] = Qyc/PerPerSeason/2
                             
                     k=int(start_summer[j])
                     for l in range(int(PerPerSeason)):
                         
                         if i.type =='warm':
                             i.flow[k+l] = 0
-                            i.charge[k+l] = i.Qy/PerPerSeason/2
+                            i.charge[k+l] = Qyh/PerPerSeason/2
                             
                         if i.type =='cold':
-                            i.flow[k+l] = -i.Qy/PerPerSeason
-                            i.charge[k+l] = i.Qy/PerPerSeason/2  
+                            i.flow[k+l] = -Qyc/PerPerSeason
+                            i.charge[k+l] = Qyc/PerPerSeason/2  
                             
                 if i.type =='warm':
                     flowwarm = i.flow
@@ -233,9 +233,9 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'warm':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear
                     else:
-                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear   
+                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear   
                         
                 i.flow = i.flow.clip(max=0)
                 flowwarm = i.flow
@@ -243,9 +243,9 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'cold':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                     else:
-                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                         
                 i.flow = i.flow.clip(max=0)
                 flowcold = i.flow
@@ -262,9 +262,9 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'warm':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear
                     else:
-                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear
                         
                 i.charge = i.charge.clip(min=0)
                 chargewarm = i.charge
@@ -272,9 +272,9 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'cold':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                     else:
-                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                         
                 i.charge = i.charge.clip(min=0)
                 chargecold = i.charge
@@ -292,9 +292,9 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'warm':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear
                     else:
-                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear   
+                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyh/PerPerYear   
                         
                 i.flow = i.flow.clip(max=0)
                 flowwarm = i.flow
@@ -302,17 +302,18 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'cold':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                     else:
-                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*i.Qy/PerPerYear
+                        i.flow[j] = -np.sin(2*np.pi*j/PerPerYear)*np.pi*Qyc/PerPerYear
                         
                 i.flow = i.flow.clip(max=0)
                 flowcold = i.flow
         
         # plt.figure()
-        # plt.plot(-flowwarm,label='heating demand',color='#EC6842')
-        # plt.plot(-flowcold,label='cooling demand',color='#00B8C8')
-        # plt.ylabel('J/day')
+        # plt.plot(-flowwarm,label='heating',color='#EC6842')
+        # plt.plot(-flowcold,label='cooling',color='#00B8C8')
+        # plt.title('Yearly heating and cooling demand')
+        # plt.ylabel('J / day')
         # plt.xlabel('day')
         # plt.legend()
         # plt.show()
@@ -321,24 +322,25 @@ def calc_demand(well_obj_list, run_length = 12, perlen=30, flowtype=1, demand=No
             if i.type == 'warm':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*i.Qy/PerPerYear + i.Qy/PerPerYear
+                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*Qyh/PerPerYear + Qyh/PerPerYear
                         
                     else:             
-                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*i.Qy/PerPerYear + i.Qy/PerPerYear
+                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*Qyh/PerPerYear + Qyh/PerPerYear
                 chargewarm = i.charge
             if i.type == 'cold':
                 for j in range(run_length):
                     if startwinter == 1:
-                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*i.Qy/PerPerYear + i.Qy/PerPerYear
+                        i.charge[j] = np.sin(2*np.pi*j/PerPerYear)*Qyc/PerPerYear + Qyc/PerPerYear
                         
                     else:
-                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*i.Qy/PerPerYear + i.Qy/PerPerYear
+                        i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*Qyc/PerPerYear + Qyc/PerPerYear
                 chargecold = i.charge
                 
         # plt.figure()
-        # plt.plot(-chargewarm,label='heating charge',color='#EC6842')
-        # plt.plot(-chargecold,label='cooling charge',color='#00B8C8')
-        # plt.ylabel('J/day')
+        # plt.plot(chargewarm,label='hot charging',color='#EC6842')
+        # plt.plot(chargecold,label='cold charging',color='#00B8C8')
+        # plt.title('Yearly charging of the wells if there are no losses')
+        # plt.ylabel('J / day')
         # plt.xlabel('day')
         # plt.legend()
         # plt.show()                      
