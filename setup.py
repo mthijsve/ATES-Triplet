@@ -1,3 +1,6 @@
+import numpy as np
+from functions_triplet import createobjfromCSV,PySystem,PyWell
+
 #%%import packages and set directories
 '''Define input files'''
 swtexe_name = 'swt_v4x64.exe' 
@@ -5,29 +8,6 @@ wellfile = 'wells.csv'
 demandfile = 'demand.csv'     
 subsurffile = 'sub-surface.csv'     
 monitoringfile = 'monitoring.csv'
-from pathlib import Path
-
-p = str(Qyh).replace('.', '')
-x = str(Qyc).replace('.', '')
-y = str(T_h).replace('.', '')
-z = str(Thmin).replace('.', '')
-name = 'sensitivity_Qh' + p + '_Qc' + x + '_injectionT' + y + '_Thmin' + z
-
-
-#%%create the objects needed
-well_obj_list = createobjfromCSV(PyWell,wellfile) #creates well object from  data in csv file
-form_obj_list = createobjfromCSV(PySystem,subsurffile)
-mon_obj_list = createobjfromCSV(PySystem,monitoringfile) # creates list of monitoring points in your grid where you can track the temperature
-
-nmon = len(mon_obj_list)
-nform = len(form_obj_list)
-nW=len(well_obj_list)         # numer of wells
-T_amb = form_obj_list[0].s1   # Ambient Temperature of the subsurface
-PEFF = form_obj_list[0].por   # porosity [-]
-
-dirs = Path(WD + '/output/' + name)                                                      
-if os.path.exists(dirs)==False:
-    os.makedirs(dirs)
 
 '''main time setting parameters'''
 perlen = 1    # (DAYS)
@@ -49,20 +29,6 @@ timprs = np.array([perlen])
 nprs = len(timprs)
 savefiles = 0 # save head and temperature files (1) or not (0)
 finaltimestep = 365/perlen*years-1
-
-'''correction factors determine the recharge of the wells by multiplying the needed flow to meet the demand by the factor'''
-corr_ws = 1.5    # correction factor hot well startup
-corr_w = 1.5     # correction factor hot well
-corr_cs = 1.0    # correction factor cold well startup
-corr_c = 1.0     # correction factor cold well
-
-Thmin = 0.5      #Thmin is the factor that determines the cutoff compared to the hot injection Temperature
-
-for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
-    if i.type == 'warm':
-        cutofftemp_h = i.T_inj-i.T_inj*Thmin
-        Tmax =  i.T_inj  # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
-cutofftemp_c = T_amb   # Temperature when the heating turns off, thus no more discharge from the hot well
  
 Tmin = 5        
 T_room = 20                 # Room temperature in building, used for return temperature groundwater after heat exchanger

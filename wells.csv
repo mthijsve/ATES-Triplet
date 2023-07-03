@@ -1,4 +1,4 @@
 xcor;ycor;T_inj;Qy;ztop;ScreenLength;Aquifer;type;N
-50;0;70;4.0E+12;-30;20;1;warm;0
+50;0;45;4.0E+12;-30;20;1;warm;0
 450;0;5;2.0E+12;-30;20;1;cold;2
 250;0;20;4.0E+12;-30;20;1;buffer;1
