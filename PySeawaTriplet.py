@@ -391,8 +391,8 @@ def Modelrun(corr_ws, corr_w,Qyh, Qyc, injectionT, Thmin):
 
         elapsed_time = time.time() - start_time
         proxy = elapsed_time/60 * rl/(period+1) - elapsed_time/60
-        print ('run time =', int(elapsed_time/60),' min')
-        print ('expected remaining run time =', int(proxy),' min')
+        #print ('run time =', int(elapsed_time/60),' min')
+        #print ('expected remaining run time =', int(proxy),' min')
 
 
     end_time = time.time()

@@ -15,7 +15,9 @@ import flopy.mt3d as mt3
 import flopy.seawat as swt
 import flopy.utils.binaryfile as bf
 import PySeawaTriplet as pst
+import time
 
+st = time.time()
 WD = os.getcwd()
 
 Qyh =[2e12] #[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
@@ -37,5 +39,5 @@ for Qyh, Qyc, injectionT, Thmin in combinations:
     mini = minimize(objective,[1.0,1.0],args=(Qyh,Qyc,injectionT,Thmin),method = 'Nelder-Mead',bounds=[(1,5),(1,4)])
     print(mini)
 
-
+print('calibraten took', (time.time()-st)/60, 'minutes' )
 
