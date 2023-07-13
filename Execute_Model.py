@@ -1,9 +1,5 @@
 import os
 from pathlib import Path
-
-from functions_triplet import *
-from flow_function_Triplet import *
-
 import itertools
 import numpy as np
 import pandas as pd
@@ -16,28 +12,52 @@ import flopy.seawat as swt
 import flopy.utils.binaryfile as bf
 import PySeawaTriplet as pst
 import time
+from concurrent.futures import ProcessPoolExecutor
+
+from functions_triplet import *
+from flow_function_Triplet import *
+
 
 st = time.time()
 WD = os.getcwd()
 
-Qyh =[2e12] #[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
-Qyc =[2e12] #[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
-injectionT =[45] #[40, 50, 60, 70, 80, 90]
-Thmin=[.656] #[0.5, 0.6, 0.7, 0.8, 0.9, .95]
+Qyh =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+Qyc =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+injectionT =[40, 50, 60, 70, 80, 90]
+Thmin=[0.5, 0.6, 0.7, 0.8, 0.9, .95]
 
 combinations = itertools.product(Qyh, Qyc, injectionT, Thmin)
 
-def objective(x,Qyh,Qyc,injectionT,Thmin):
-    print(x)
-    Z = abs(pst.Modelrun(x[0],x[1],Qyh,Qyc,injectionT,Thmin))
-    return Z
+def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
+    def find_zero(Z, start, end, step):
+        temp = None
+        values = np.arange(start, end, step)
+        for i in values:
+            if Z(i) == 0:
+                temp = i
+                break
+        return temp
+
+    def model_run_wrapper(i):
+        return abs(pst.Modelrun(i, Qyh, Qyc, injectionT, Thmin))
+
+    temp = find_zero(model_run_wrapper, bounds[0], bounds[1], 0.5)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper, temp - 0.4, temp + 0.5, 0.1)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper, temp - 0.09, temp + 0.1, 0.01)
+    print(temp)
+    return temp
 
 
-for Qyh, Qyc, injectionT, Thmin in combinations:
-    #minimize triplet model
-
-    mini = minimize(objective,[1.0,1.0],args=(Qyh,Qyc,injectionT,Thmin),method = 'Nelder-Mead',bounds=[(1,5),(1,4)])
+def run_calibration_combination(combination):
+    Qyh, Qyc, injectionT, Thmin = combination
+    mini = calibration([1, 5], Qyh, Qyc, injectionT, Thmin)
     print(mini)
 
-print('calibraten took', (time.time()-st)/60, 'minutes' )
+if __name__ == '__main__':
+    with ProcessPoolExecutor() as executor:
+        executor.map(run_calibration_combination, combinations)
+
+    print('Calibration took', (time.time() - st) / 60, 'minutes')
 

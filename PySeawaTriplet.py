@@ -1,5 +1,6 @@
 from functions_triplet import *
 from flow_function_Triplet import *
+
 import pandas as pd
 import numpy as np
 import flopy
@@ -11,7 +12,9 @@ import os
 from pathlib import Path
 import time
 
-def Modelrun(corr_ws, corr_w,Qyh, Qyc, injectionT, Thmin):
+def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
+    print('start_modelrun with corr_w = ', corr_w,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT, 'Thmin=', Thmin)
+    corr_ws = corr_w
 
     '''Define input files'''
     swtexe_name = 'swt_v4x64.exe' 
@@ -46,7 +49,7 @@ def Modelrun(corr_ws, corr_w,Qyh, Qyc, injectionT, Thmin):
     # startup_years is the time that the system is in startup mode.
     # At the end of the startup time the wells should be at their maximum capacity to run in a steady state mode.
 
-    years = 5        # set the minimum #years that a system will run
+    years = 8        # set the minimum #years that a system will run
     ppy = 365/perlen
     sl = int(round (ppy * startup_years/perlen, 0)) # startup length                                                       
     rl = int(round (365 * years / perlen, 0)) # run length
@@ -391,7 +394,7 @@ def Modelrun(corr_ws, corr_w,Qyh, Qyc, injectionT, Thmin):
 
         elapsed_time = time.time() - start_time
         proxy = elapsed_time/60 * rl/(period+1) - elapsed_time/60
-        #print ('run time =', int(elapsed_time/60),' min')
+        print ('run time =', int(elapsed_time/60),' min')
         #print ('expected remaining run time =', int(proxy),' min')
 
 
