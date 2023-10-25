@@ -20,12 +20,12 @@ from flow_function_Triplet import *
 st = time.time()
 WD = os.getcwd()
 
-
-#Qyc =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+Qyh =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+Qyc =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
 injectionT =[40, 50, 60, 70, 80, 90]
-Thmin=[0.1, 0.3, 0.5, 0.7,0.9]  
+Thmin=[0.5, 0.6, 0.7, 0.8, 0.9, .95]
 
-combinations = itertools.product(injectionT, Thmin)
+combinations = itertools.product(Qyh, Qyc, injectionT, Thmin)
 
 def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
     def find_zero(Z, start, end, step):
@@ -50,8 +50,8 @@ def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
 
 
 def run_calibration_combination(combination):
-    injectionT, Thmin = combination
-    mini = calibration([1, 5], 10e12, 0, injectionT, Thmin)
+    Qyh, Qyc, injectionT, Thmin = combination
+    mini = calibration([1, 5], Qyh, Qyc, injectionT, Thmin)
     print(mini)
 
 if __name__ == '__main__':

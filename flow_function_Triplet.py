@@ -111,7 +111,7 @@ def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1,
                 if i.type =='cold':
                     flowcold = i.flow
                     chargecold = i.charge
-                    
+        
     if flowtype == 1: #block function energy needed, charge block function throughout the year
         
         PerPerSeason = PerPerYear/2
@@ -238,7 +238,6 @@ def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1,
                 i.charge = i.charge.clip(min=0)
                 chargecold = i.charge
                 
-
     if flowtype == 3: #sine function heat/cold, charge well according to sine function through whole year
         for i in well_obj_list:
             if i.type == 'warm':
@@ -260,7 +259,6 @@ def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1,
                         
                 i.flow = i.flow.clip(max=0)
                 flowcold = i.flow
-
         for i in well_obj_list:
             if i.type == 'warm':
                 for j in range(run_length):
@@ -278,7 +276,6 @@ def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1,
                     else:
                         i.charge[j] = -np.sin(2*np.pi*j/PerPerYear)*Qyc/PerPerYear + Qyc/PerPerYear
                 chargecold = i.charge
-
     if flowtype == 4:
         '''supply total demand in "demand.csv'''
         demand = pd.read_csv(demand,skiprow = [0],delimiter=';')
@@ -296,4 +293,3 @@ def calc_demand(well_obj_list, Qyh, Qyc, run_length = 12, perlen=30, flowtype=1,
                 
             flowcold = i.flow
             chargecold = i.charge
-
