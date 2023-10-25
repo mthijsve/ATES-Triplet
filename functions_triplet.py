@@ -7,7 +7,7 @@ import flopy.mt3d as mt3
 import pandas as pd
  
 def pumpingrate (z,Tin,Tout,Cw):
-    # z = demand in J
+    ''' z = demand in J '''
     u = z/(Cw*np.abs(Tout - Tin))
     return u
         
