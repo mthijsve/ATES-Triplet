@@ -229,38 +229,38 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
                 if i.type == 'warm':   
                     if period < ppy*startup_years:           
                         if T_a_h < cutofftemp_h:
-                            i.Q = corr_ws*pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)/perlen
+                            i.Q = corr_ws*pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)/perlen
                             Qh = 0
                         else:
-                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_ws)/perlen
+                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)*corr_ws)/perlen
                             Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
                         temp_QH = i.Q
                     else:
                         if T_a_h < cutofftemp_h:
-                            i.Q = corr_w*pumpingrate(i.charge[period], T_a_h, Tbh,Cw)/perlen
+                            i.Q = corr_w*pumpingrate(i.charge[period], T_a_h, T_a_b,Cw)/perlen
                             Qh = 0
                         else:
-                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_w)/perlen
+                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)*corr_w)/perlen
                             Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
                         temp_QH = i.Q
                 if i.type == 'cold':
                     if period < ppy*startup_years:
                         if T_a_c <cutofftemp_c:
-                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc,i.T_inj , Cw)*corr_cs)/perlen
+                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], T_a_b,i.T_inj , Cw)*corr_cs)/perlen
                             
                             Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
                         else:
                             Qc = 0
-                            i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_cs)/perlen
+                            i.Q = (pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_cs)/perlen
                         temp_QC = i.Q
                     
                     else:
                         if T_a_c <cutofftemp_c:
-                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
+                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_c)/perlen
                             Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
                         else:
                             Qc = 0
-                            i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
+                            i.Q = (pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_c)/perlen
                             
                         temp_QC = i.Q
                     
@@ -349,11 +349,9 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
             if well_obj_list[j].Q <0:
                 Run_output.loc[period,'W'+str(j)+'_Vin'] =  0
                 Run_output.loc[period,'W'+str(j)+'_Vout'] =  well_obj_list[j].Q*perlen
-                Ttemp = well_obj_list[j].T_modflow
             else:
                 Run_output.loc[period,'W'+str(j)+'_Vin'] = well_obj_list[j].Q*perlen
                 Run_output.loc[period,'W'+str(j)+'_Vout'] = 0  
-                Ttemp = well_obj_list[j].T_modflow
                 
             if well_obj_list[j].type == 'warm':
                 Run_output.loc[period,'W'+str(j)+'_T_sys_in'] = well_obj_list[j].T_inj
@@ -373,7 +371,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
                 
 
             else:
-                Run_output.loc[period,'W'+str(j)+'_T_sys_in'] = Ttemp
+                Run_output.loc[period,'W'+str(j)+'_T_sys_in'] = well_obj_list[j].T_inj
                 Run_output.loc[period,'W'+str(j)+'_T_mf_out'] = well_obj_list[j].T_modflow
                 Run_output.loc[period,'Dens_water_in'] = denseref + drhodT * well_obj_list[j].T_inj
                 Run_output.loc[period,'Dens_water_out'] = denseref + drhodT * well_obj_list[j].T_modflow
