@@ -3,8 +3,8 @@ import os
 import shutil
 
 # Define the path to the tar.gz file and the destination directory
-tar_file = 'Buoyancy2.tar.gz'
-dest_dir = 'buoyancy output'
+tar_file = 'Buffercheck.tar.gz'
+dest_dir = 'Buffercheck output'
 
 # Create the destination directory if it doesn't exist
 if not os.path.exists(dest_dir):
