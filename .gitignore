@@ -1,6 +1,5 @@
 __pycache__
 output/
-buoyancy output/
 .vscode/
 output.tar.gz
 Buoyancy.tar.gz
@@ -8,3 +7,6 @@ Buoyancy2.tar.gz
 checktar.py
 buoyancy analyses.py
 results.csv
+combicheck.csv
+Buffercheck.tar.gz
+Buffercheck output/
