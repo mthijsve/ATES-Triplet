@@ -125,8 +125,8 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     gwflow_x = -0.   # Groundwater flowvelocity in x direction [m/y]
     gwflow_y = -0.   # Groundwater flowvelocity in y direction [m/y]
 
-    densflow = 0     # turn densityflow off or on by switching the VDF packages off or on  
-    WaterDensON = 0  # Calculation of parameters standard =1
+    densflow = 1     # turn densityflow off or on by switching the VDF packages off or on  
+    WaterDensON = 1  # Calculation of parameters standard =1
 
     '''correction factors determine the recharge of the wells by multiplying the needed flow to meet the demand by the factor'''
     corr_c = 1.0      # correction factor cold well
