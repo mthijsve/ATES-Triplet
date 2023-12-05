@@ -20,14 +20,14 @@ from flow_function_Triplet import *
 st = time.time()
 WD = os.getcwd()
 
-Qyh =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
-Qyc =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
-injectionT =[40, 50, 60, 70, 80, 90]
-Thmin=[0.5, 0.6, 0.7, 0.8, 0.9, .95]
+Qyh =[0.5e12, 1e12, 2e12, 5e12, 10e12]
+Qyc =[0.5e12, 1e12, 2e12, 5e12, 10e12]
+injectionT =[50, 60, 70, 80, 90]
 
-combinations = itertools.product(Qyh, Qyc, injectionT, Thmin)
 
-def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
+combinations = itertools.product(Qyh, Qyc, injectionT)
+
+def calibration(bounds, Qyh, Qyc, injectionT):
     def find_zero(Z, start, end, step):
         temp = None
         values = np.arange(start, end, step)
@@ -37,21 +37,33 @@ def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
                 break
         return temp
 
-    def model_run_wrapper(i):
-        return abs(pst.Modelrun(i, Qyh, Qyc, injectionT, Thmin))
+    def model_run_wrapper_dnmh(i):
+        return abs(pst.Modelrun(i, Qyh, Qyc, injectionT)[0])  # assuming Modelrun returns [dnmh, dnmc]
 
-    temp = find_zero(model_run_wrapper, bounds[0], bounds[1], 0.5)
+    def model_run_wrapper_dnmc(i):
+        return abs(pst.Modelrun(i, Qyh, Qyc, injectionT)[1])  # assuming Modelrun returns [dnmh, dnmc]
+
+    # First calibrate to dnmc
+    temp = find_zero(model_run_wrapper_dnmc, bounds[0], bounds[1], 0.5)
     if temp is not None:
-        temp = find_zero(model_run_wrapper, max(1,temp - 0.4), temp + 0.5, 0.1)
+        temp = find_zero(model_run_wrapper_dnmc, max(1,temp - 0.4), temp + 0.5, 0.1)
     if temp is not None:
-        temp = find_zero(model_run_wrapper, max(1,temp - 0.09), temp + 0.1, 0.01)
+        temp = find_zero(model_run_wrapper_dnmc, max(1,temp - 0.09), temp + 0.1, 0.01)
+
+    # Then calibrate to dnmh
+    temp = find_zero(model_run_wrapper_dnmh, bounds[0], bounds[1], 0.5)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper_dnmh, max(1,temp - 0.4), temp + 0.5, 0.1)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper_dnmh, max(1,temp - 0.09), temp + 0.1, 0.01)
+
     print(temp)
     return temp
 
 
 def run_calibration_combination(combination):
-    Qyh, Qyc, injectionT, Thmin = combination
-    mini = calibration([1, 5], Qyh, Qyc, injectionT, Thmin)
+    Qyh, Qyc, injectionT = combination
+    mini = calibration([1, 5], Qyh, Qyc, injectionT)
     print(mini)
 
 if __name__ == '__main__':

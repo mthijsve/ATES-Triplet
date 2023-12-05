@@ -16,10 +16,10 @@ import os
 from pathlib import Path
 import time
 
-def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
-    print('start_modelrun with corr_w = ', corr_w,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT, 'Thmin=', Thmin)
+def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
+    print('start_modelrun with corr_w = ', corr_w,'. corr_c= ',corr_c,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT)
     corr_ws = corr_w                    #this creates the possibility of having a different startup correction factor than the regular correction factor
-
+    corr_cs = corr_c
     '''Define input files'''
     swtexe_name = 'swt_v4x64.exe'       #load the correct model
     wellfile = 'wells.csv'              #load the correct well settings
@@ -29,8 +29,8 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     p = str(Qyh).replace('.', '')           
     x = str(Qyc).replace('.', '')           
     y = str(injectionT).replace('.', '')    
-    z = str(Thmin).replace('.', '')         
-    name = 'sensitivity_Qh' + p + '_Qc' + x + '_injectionT' + y + '_Thmin' + z
+
+    name = 'Newruns_Qh' + p + '_Qc' + x + '_injectionT' + y 
 
     #creating objects from the csv files 
     well_obj_list = createobjfromCSV(PyWell,wellfile)
@@ -106,9 +106,14 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
         if i.type == 'warm':
             i.T_inj = injectionT
-            cutofftemp_h = Tbh+(i.T_inj-Tbh)*Thmin
+            cutofftemp_h = i.T_inj - 20
             Tmax =  i.T_inj  # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
             # please note: seawat uses a linear approximation of this relation
+        if i.type == 'cold':
+            i.T_inj = injectionT
+            cutofftemp_c = i.T_inj + 5
+            Tmin = i.T_inj
+            Tmax = i.T_inj
 
     for i in range(len(well_obj_list)):
         if well_obj_list[i].T_inj > Tmax:
@@ -128,22 +133,17 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     densflow = 1     # turn densityflow off or on by switching the VDF packages off or on  
     WaterDensON = 1  # Calculation of parameters standard =1
 
-    '''correction factors determine the recharge of the wells by multiplying the needed flow to meet the demand by the factor'''
-    corr_c = 1.0      # correction factor cold well
-    corr_cs = 1.0     # correction factor cold well startup
-    cutofftemp_c = T_amb   # Temperature when the heating turns off, thus no more discharge from the hot well
-    
     '''grid settings '''
     dmin =  1             # smallest cel size at well [m]
     dz =   2              # vertical gridlayer thickness [m]  important to syncronize with layer thicknesses in csv file!
 
     dmin_bound = 200      # total distance from well with 'dmin' sized cells [m]
     dmax = 200            # largest cell size at model boundary [m]
-    aroundAll = 1000      # normal=1500 [m] size of grid around well.
+    aroundAll = 1500      # normal=1500 [m] size of grid around well.
     nstep = 20            # minimum number of steps that gridfunctions must add  to acquire the dmax size requirement [-]
 
     AXI = 1              # axial symmetric grid or not. | 1=AXI, 0 = 3D |
-    LIN = 0              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
+    LIN = 1              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
     ICBUND_Up = -1       # TOP:: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     ICBUND_Down = -1     # BOTTOM: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     OutsideAirBound = 0  # 1 = ON, 0=OFF, if ON: the temperature boundary at model top is adjusted following outside air temperature 
@@ -307,7 +307,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
                                 invisc=-1, visc=-1, extension='vsc')
         
         mswtf.write_input()
-        m = mswtf.run_model(silent=True)   #Run SEAWAT!      (silent=FALSE gives details for each timestep, silent=TRUE only gives end signal in the console)
+        m = mswtf.run_model(silent=False)   #Run SEAWAT!      (silent=FALSE gives details for each timestep, silent=TRUE only gives end signal in the console)
         
 
         if savefiles == 1:
@@ -407,5 +407,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     #values dnm.. stands for demand not met (cold or hot)(startup period or not). This is used to calibrate the model. It should be 0 in the last year of startup and 0 in the years after
     Run_output['dnmh'].replace({False: 0, True: 1}, inplace=True)
     dnmh = Run_output['dnmh'].loc[mask2].sum()
-    return dnmh
+    Run_output['dnmc'].replace({False: 0, True: 1}, inplace=True)
+    dnmc = Run_output['dnmc'].loc[mask2].sum()
+    return dnmh, dnmc
 
