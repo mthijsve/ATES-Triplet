@@ -20,6 +20,7 @@ def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
     print('start_modelrun with corr_w = ', corr_w,'. corr_c= ',corr_c,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT)
     corr_ws = corr_w                    #this creates the possibility of having a different startup correction factor than the regular correction factor
     corr_cs = corr_c
+
     '''Define input files'''
     swtexe_name = 'swt_v4x64.exe'       #load the correct model
     wellfile = 'wells.csv'              #load the correct well settings
@@ -113,7 +114,6 @@ def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
             i.T_inj = injectionT
             cutofftemp_c = i.T_inj + 5
             Tmin = i.T_inj
-            Tmax = i.T_inj
 
     for i in range(len(well_obj_list)):
         if well_obj_list[i].T_inj > Tmax:
@@ -143,7 +143,7 @@ def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
     nstep = 20            # minimum number of steps that gridfunctions must add  to acquire the dmax size requirement [-]
 
     AXI = 1              # axial symmetric grid or not. | 1=AXI, 0 = 3D |
-    LIN = 1              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
+    LIN = 0              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
     ICBUND_Up = -1       # TOP:: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     ICBUND_Down = -1     # BOTTOM: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     OutsideAirBound = 0  # 1 = ON, 0=OFF, if ON: the temperature boundary at model top is adjusted following outside air temperature 
@@ -206,6 +206,7 @@ def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
     ''' Create SEAWAT model '''                                                     # set all the fixed conditions that don't change while running etc.
     mswtf = swt.Seawat(name, 'nam_swt',exe_name=swtexe_name,
                     model_ws=dirs)
+    
     #to change to hours, add itmuni here, see documentation for options
     discret = mf.ModflowDis(mswtf, nrow=int(grid_obj.nrow), ncol=int(grid_obj.ncol), nlay=grid_obj.nlay,
                     delr=grid_obj.delr, delc=grid_obj.delc, laycbd=0., top=grid_obj.top, 
@@ -307,7 +308,7 @@ def Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT):
                                 invisc=-1, visc=-1, extension='vsc')
         
         mswtf.write_input()
-        m = mswtf.run_model(silent=False)   #Run SEAWAT!      (silent=FALSE gives details for each timestep, silent=TRUE only gives end signal in the console)
+        m = mswtf.run_model(silent=True)   #Run SEAWAT!      (silent=FALSE gives details for each timestep, silent=TRUE only gives end signal in the console)
         
 
         if savefiles == 1:
