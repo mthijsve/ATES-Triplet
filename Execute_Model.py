@@ -20,14 +20,14 @@ from flow_function_Triplet import *
 st = time.time()
 WD = os.getcwd()
 
-Qyh =[0.5e12, 1e12]#, 2e12, 5e12, 10e12]
-Qyc =[0.5e12, 1e12]#, 2e12, 5e12, 10e12]
-injectionT =[50, 60]#, 70, 80, 90]
+Qyh =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+Qyc =[0, 0.5e12, 1e12, 2e12, 5e12, 10e12]
+injectionT =[40, 50, 60, 70, 80, 90]
+Thmin=[0.5, 0.6, 0.7, 0.8, 0.9, .95]
 
+combinations = itertools.product(Qyh, Qyc, injectionT, Thmin)
 
-combinations = itertools.product(Qyh, Qyc, injectionT)
-
-def calibration(bounds, Qyh, Qyc, injectionT, corr_w, corr_c):
+def calibration(bounds, Qyh, Qyc, injectionT, Thmin):
     def find_zero(Z, start, end, step):
         temp = 1
         values = np.arange(start, end, step)
@@ -37,31 +37,21 @@ def calibration(bounds, Qyh, Qyc, injectionT, corr_w, corr_c):
                 break
         return temp
 
-    def model_run_wrapper_dnmc(corr_c):
-        return abs(pst.Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT)[1])
+    def model_run_wrapper(i):
+        return abs(pst.Modelrun(i, Qyh, Qyc, injectionT, Thmin))
 
-    def model_run_wrapper_dnmh(corr_w):
-        return abs(pst.Modelrun(corr_w, corr_c, Qyh, Qyc, injectionT)[0])
-    # First calibrate to dnmc
-    corr_c = find_zero(model_run_wrapper_dnmc, bounds[0], bounds[1], 0.5)
-    if corr_c is not None:
-        corr_c = find_zero(model_run_wrapper_dnmc, max(1,corr_c - 0.4), corr_c + 0.5, 0.1)
-    if corr_c is not None:
-        corr_c = find_zero(model_run_wrapper_dnmc, max(1,corr_c - 0.09), corr_c + 0.1, 0.01)
+    temp = find_zero(model_run_wrapper, bounds[0], bounds[1], 0.5)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper, max(1,temp - 0.4), temp + 0.5, 0.1)
+    if temp is not None:
+        temp = find_zero(model_run_wrapper, max(1,temp - 0.09), temp + 0.1, 0.01)
+    print(temp)
+    return temp
 
-    # Then calibrate to dnmh
-    corr_w = find_zero(model_run_wrapper_dnmh, bounds[0], bounds[1], 0.5)
-    if corr_w is not None:
-        corr_w = find_zero(model_run_wrapper_dnmh, max(1,corr_w - 0.4), corr_w + 0.5, 0.1)
-    if corr_w is not None:
-        corr_w = find_zero(model_run_wrapper_dnmh, max(1,corr_w - 0.09), corr_w + 0.1, 0.01)
-
-    print(corr_w, corr_c)
-    return corr_w, corr_c
 
 def run_calibration_combination(combination):
-    Qyh, Qyc, injectionT = combination
-    mini = calibration([1, 5], 2e12, 2e12, 60, 1,1)
+    Qyh, Qyc, injectionT, Thmin = combination
+    mini = calibration([1, 5], Qyh, Qyc, injectionT, Thmin)
     print(mini)
 
 if __name__ == '__main__':
