@@ -16,8 +16,8 @@ import os
 from pathlib import Path
 import time
 
-def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
-    print('start_modelrun with corr_w = ', corr_w,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT, 'Thmin=', Thmin)
+def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
+    print('start_modelrun with corr_w = ', corr_w,'. Qyh=', Qyh, 'Qyc=', Qyc, 'injectionT=', injectionT, 'Cp=', Cutoffper, 'Rp=', Returnper)
     corr_ws = corr_w                    #this creates the possibility of having a different startup correction factor than the regular correction factor
 
     '''Define input files'''
@@ -29,8 +29,9 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     p = str(Qyh).replace('.', '')           
     x = str(Qyc).replace('.', '')           
     y = str(injectionT).replace('.', '')    
-    z = str(Thmin).replace('.', '')         
-    name = 'sensitivity_Qh' + p + '_Qc' + x + '_injectionT' + y + '_Thmin' + z
+    z = str(Cutoffper).replace('.', '')    
+    z2 = str(Returnper).replace('.', '')     
+    name = 'sensitivity_Qh' + p + '_Qc' + x + '_injectionT' + y + '_CP' + z + '_RP' + z2
 
     #creating objects from the csv files 
     well_obj_list = createobjfromCSV(PyWell,wellfile)
@@ -51,11 +52,11 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
 
     '''main time setting parameters'''
     perlen = 1    # (DAYS)
-    startup_years = 3 # set the minimum #years that a system will run in startup mode
+    startup_years = 1 # set the minimum #years that a system will run in startup mode
 
     # At the end of the startup time the wells should be at their maximum capacity to run in a steady state mode.
 
-    years = 8        # set the minimum #years that a system will run
+    years = 2        # set the minimum #years that a system will run
     ppy = 365/perlen
     sl = int(round (ppy * startup_years/perlen, 0)) # startup length                                                       
     rl = int(round (365 * years / perlen, 0)) # run length
@@ -100,13 +101,14 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
     Tmin = 5        
     T_room = 20                 # Room temperature in building, used for return temperature groundwater after heat exchanger
     T_loss_building = 2         # degrees that the return temperature deviates from room temperature. The higher, the bigger the losses in the HVAC system. 
-    Tbh  = T_room + T_loss_building          # return temperature from HVAC
+    Roomtemp  = T_room + T_loss_building          # return temperature from HVAC
     Tbc  = T_room - T_loss_building          # return temperature cooling from HVAC
 
     for i in well_obj_list:       # Update each active Python well object with the temperature and head at its grid location
         if i.type == 'warm':
             i.T_inj = injectionT
-            cutofftemp_h = Tbh+(i.T_inj-Tbh)*Thmin
+            cutofftemp_h = Roomtemp + (i.T_inj - Roomtemp) * Cutoffper
+            Tbh = Roomtemp + (cutofftemp_h - Roomtemp) * Returnper
             Tmax =  i.T_inj  # To calculate an approximation of the Temperature|density relation, the minimum(Tmax) and maximum density (4 C)
             # please note: seawat uses a linear approximation of this relation
 
@@ -227,13 +229,14 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
         temp_QC=0
         if well_obj_list:  # Create well and temperature lists following Modflow/MT3DMS format. Each timestep, flows and infiltration temp are assigned to the wells  
             for i in well_obj_list:
+                #for the charge, Tbh is used and Tbc because the buffer temperature is irrelevant, because the demand determines the recharge
                 if i.type == 'warm':   
                     if period < ppy*startup_years:           
                         if T_a_h < cutofftemp_h:
                             i.Q = corr_ws*pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)/perlen
                             Qh = 0
                         else:
-                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)*corr_ws)/perlen
+                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_ws)/perlen
                             Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
                         temp_QH = i.Q
                     else:
@@ -241,23 +244,23 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Thmin):
                             i.Q = corr_w*pumpingrate(i.charge[period], T_a_h, T_a_b,Cw)/perlen
                             Qh = 0
                         else:
-                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)*corr_w)/perlen
+                            i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_w)/perlen
                             Qh = abs(pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw))
                         temp_QH = i.Q
                 if i.type == 'cold':
                     if period < ppy*startup_years:
                         if T_a_c <cutofftemp_c:
-                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], T_a_b,i.T_inj , Cw)*corr_cs)/perlen
+                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc,i.T_inj , Cw)*corr_cs)/perlen
                             
                             Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
                         else:
                             Qc = 0
-                            i.Q = (pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_cs)/perlen
+                            i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_cs)/perlen
                         temp_QC = i.Q
                     
                     else:
                         if T_a_c <cutofftemp_c:
-                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_c)/perlen
+                            i.Q = (pumpingrate(i.flow[period],T_a_c, Tbc,Cw) + pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
                             Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
                         else:
                             Qc = 0
