@@ -3,7 +3,7 @@ from flow_function_Triplet import *
 
 from functions_triplet import *
 from flow_function_Triplet import *
-
+import shutil
 import pandas as pd
 import numpy as np
 import numpy as np
@@ -67,7 +67,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
     nstp = 1      # Number of Modflow time steps per stress period
     timprs = np.array([perlen])
     nprs = len(timprs)
-    savefiles = 0 # save head and temperature files (1) or not (0)
+    savefiles = 1 # save head and temperature files (1) or not (0)
     finaltimestep = 365/perlen*years-1
     ''' basic parameter settings'''
     al = 0.5                                 # dispersivity [m]                                 
@@ -233,7 +233,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
                 if i.type == 'warm':   
                     if period < ppy*startup_years:           
                         if T_a_h < cutofftemp_h:
-                            i.Q = corr_ws*pumpingrate(i.charge[period], T_a_b, i.T_inj,Cw)/perlen
+                            i.Q = corr_ws*pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)/perlen
                             Qh = 0
                         else:
                             i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_ws)/perlen
@@ -241,7 +241,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
                         temp_QH = i.Q
                     else:
                         if T_a_h < cutofftemp_h:
-                            i.Q = corr_w*pumpingrate(i.charge[period], T_a_h, T_a_b,Cw)/perlen
+                            i.Q = corr_w*pumpingrate(i.charge[period], T_a_h, Tbh,Cw)/perlen
                             Qh = 0
                         else:
                             i.Q = (pumpingrate(i.flow[period] ,T_a_h ,Tbh ,Cw) + pumpingrate(i.charge[period], Tbh, i.T_inj,Cw)*corr_w)/perlen
@@ -264,7 +264,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
                             Qc = abs(pumpingrate(i.flow[period],T_a_c, Tbc,Cw))
                         else:
                             Qc = 0
-                            i.Q = (pumpingrate(i.charge[period], T_a_b, i.T_inj, Cw)*corr_c)/perlen
+                            i.Q = (pumpingrate(i.charge[period], Tbc, i.T_inj, Cw)*corr_c)/perlen
                             
                         temp_QC = i.Q
                     
@@ -281,8 +281,6 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
         '''Initialize MODFLOW Packages'''
         bas = mf.ModflowBas(mswtf, ibound=grid_obj.IBOUND, strt=grid_obj.head)         # Basemodel Modflow
         wel = mf.ModflowWel(mswtf, stress_period_data = well_LRCQ_list)                  # Put in Wells
-        words = ['head','drawdown','budget', 'phead', 'pbudget']                
-        save_head_every = 1
         lpf = mf.ModflowLpf(mswtf, hk=grid_obj.HK, vka=grid_obj.VK, ss=grid_obj.ss, sy=0.15, laytyp=laytyp, layavg=0.,ipakcb=53) 
         oc = mf.ModflowOc(mswtf)                                                       # Output control package class --> moved (p3.7 iso p3.6)                   
         pcg = mf.ModflowPcg(mswtf, mxiter=200, iter1=200, npcond=1,                    # Preconditioned Conjugate-Gradient Package  --> solves the finite differences equations
