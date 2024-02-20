@@ -21,10 +21,10 @@ st = time.time()
 WD = os.getcwd()
 
 #Qyh =[0.5e12, 1e12]#, 2e12, 5e12, 10e12]
-Qyc =[0.5e12, 1e12]#, 2e12, 5e12, 10e12]
-injectionT =[50, 60]#, 70, 80, 90]
-Cutoffper=[0.5, 0.7]#, 0.9]
-Returnper=[0.5, 0.7]#, 0.9]
+Qyc =[0.5e12, 1e12, 2e12, 5e12, 10e12]
+injectionT =[50, 60, 70, 80, 90]
+Cutoffper=[0.5, 0.7, 0.9]
+Returnper=[0.5, 0.7, 0.9]
 
 combinations = itertools.product(Qyc, injectionT, Cutoffper, Returnper)
 

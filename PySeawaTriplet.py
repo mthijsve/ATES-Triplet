@@ -46,17 +46,18 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
     
     #create output folder
     WD = os.getcwd()
-    dirs = Path(WD + '/output/' + name)                                                      
+    dirs = Path(WD + '/output/' + name)
+    print(dirs)                                                      
     if os.path.exists(dirs)==False:
         os.makedirs(dirs)
 
     '''main time setting parameters'''
     perlen = 1    # (DAYS)
-    startup_years = 1 # set the minimum #years that a system will run in startup mode
+    startup_years = 3 # set the minimum #years that a system will run in startup mode
 
     # At the end of the startup time the wells should be at their maximum capacity to run in a steady state mode.
 
-    years = 2        # set the minimum #years that a system will run
+    years = 8        # set the minimum #years that a system will run
     ppy = 365/perlen
     sl = int(round (ppy * startup_years/perlen, 0)) # startup length                                                       
     rl = int(round (365 * years / perlen, 0)) # run length
@@ -145,7 +146,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
     nstep = 20            # minimum number of steps that gridfunctions must add  to acquire the dmax size requirement [-]
 
     AXI = 1              # axial symmetric grid or not. | 1=AXI, 0 = 3D |
-    LIN = 0              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
+    LIN = 1              # Linear (1) or logarithmic (0) cell sizes buildup around the center of the modelgrid 
     ICBUND_Up = -1       # TOP:: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     ICBUND_Down = -1     # BOTTOM: -1 = boundary has constant temperature (NO Flow, YES Temperature boundary), 1 = NO Flow, No Tempertature boundary
     OutsideAirBound = 0  # 1 = ON, 0=OFF, if ON: the temperature boundary at model top is adjusted following outside air temperature 
@@ -205,6 +206,7 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
 
     '''calculate flows '''
     calc_demand(well_obj_list, Qyh , Qyc, perlen=perlen, flowtype=flowtype, run_length=rl, years=years, startwinter=startwinter) # calculates flows during simulation
+    
     ''' Create SEAWAT model '''                                                     # set all the fixed conditions that don't change while running etc.
     mswtf = swt.Seawat(name, 'nam_swt',exe_name=swtexe_name,
                     model_ws=dirs)
@@ -411,3 +413,4 @@ def Modelrun(corr_w,Qyh, Qyc, injectionT, Cutoffper, Returnper):
     dnmh = Run_output['dnmh'].loc[mask2].sum()
     return dnmh
 
+Modelrun(1,10e12, 1e12, 70, 0.5, 0.5)

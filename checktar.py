@@ -3,8 +3,8 @@ import os
 import shutil
 
 # Define the path to the tar.gz file and the destination directory
-tar_file = 'Buffercheck.tar.gz'
-dest_dir = 'Buffercheck output'
+tar_file = 'output/10e12b.tar.gz'
+dest_dir = 'Paper1 output'
 
 # Create the destination directory if it doesn't exist
 if not os.path.exists(dest_dir):
@@ -18,3 +18,4 @@ with tarfile.open(tar_file, 'r:gz') as archive:
         if member.name.endswith('.csv'):
             # Extract the file to the destination directory
             archive.extract(member, dest_dir)
+print('done', tar_file)
