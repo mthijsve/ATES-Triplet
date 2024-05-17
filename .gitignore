@@ -12,3 +12,15 @@ combicheck.csv
 Buffercheck.tar.gz
 Buffercheck output/
 Paper1_output/
+sinewave image.py
+Post-Processing.py
+1000000000000.0well_flow_rates.png
+1000000000000.0well_temperatures.png
+5000000000000.0well_flow_rates.png
+5000000000000.0well_temperatures.png
+10000000000000.0well_flow_rates.png
+10000000000000.0well_temperatures.png
+Checkdata.py
+EGPD.py
+EGPD/
+paper1_output2/
