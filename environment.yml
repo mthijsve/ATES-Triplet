@@ -104,4 +104,4 @@ dependencies:
   - zlib=1.2.13=h8cc25b3_0
   - zstandard=0.18.0=py39h2bbff1b_0
   - zstd=1.5.2=h19a0ad4_0
-prefix: C:\Users\msvanesch\Miniconda3\envs\ATriplet
+
